@@ -4,6 +4,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const { errorHandler } = require("./middleware/errorMiddleware");
 const authRoutes = require("./routes/authRoutes");
+const linkRoutes = require("./routes/linkRoutes");
 
 const app = express();
 
@@ -12,6 +13,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/links", linkRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
