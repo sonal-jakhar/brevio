@@ -22,7 +22,6 @@ const linkSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
-      default: null,
       trim: true,
     },
     totalClicks: {
@@ -45,4 +44,4 @@ const linkSchema = new mongoose.Schema(
 
 linkSchema.index({ user: 1, createdAt: -1 });
 
-module.exports = mongoose.model("Link", linkSchema);
+module.exports = mongoose.models.Link || mongoose.model("Link", linkSchema);
