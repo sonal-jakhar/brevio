@@ -1,5 +1,6 @@
 const Link = require("../models/link");
 const { redisClient } = require("../config/redis");
+const { trackClick } = require("../utils/trackClick");
 
 //Redirect to original URL
 //GET /:shortCode
@@ -16,9 +17,17 @@ const redirectToOriginal = async (req, res, next) => {
     }
 
     if (cachedUrl) {
-      Link.findOneAndUpdate({ shortCode }, { $inc: { clicks: 1 } }).exec();
-
-      return res.redirect(cachedUrl);
+      try {
+        const parsed = JSON.parse(cachedUrl);
+        trackClick(req, {
+          _id: parsed.linkId,
+          shortCode: parsed.shortCode,
+        });
+        return res.redirect(parsed.originalUrl);
+      } catch {
+        // malformed cache entry — fall through to MongoDB
+        await redisClient.del(shortCode);
+      }
     }
 
     //Step 2 - cache miss, query MongoDB
@@ -36,13 +45,21 @@ const redirectToOriginal = async (req, res, next) => {
 
     //Step 3 - store in Redis with 1 hour TTL
     try {
-      await redisClient.setEx(shortCode, 3600, link.originalUrl);
+      await redisClient.setEx(
+        shortCode,
+        3600,
+        JSON.stringify({
+          originalUrl: link.originalUrl,
+          linkId: link._id,
+          shortCode: link.shortCode,
+        }),
+      );
     } catch (redisErr) {
       console.error("Redis write failed:", redisErr);
     }
 
-    //Step 4 - fire-and-forget click increment
-    Link.findOneAndUpdate({ shortCode }, { $inc: { clicks: 1 } }).exec();
+    //Step 4 - fire-and-forget full click tracking
+    trackClick(req, link);
 
     return res.redirect(link.originalUrl);
   } catch (err) {
