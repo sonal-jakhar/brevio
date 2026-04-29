@@ -18,7 +18,6 @@ app.set("trust proxy", true);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/links", linkRoutes);
-app.use("/", redirectRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -26,6 +25,8 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use("/", redirectRoutes);
 
 app.use(errorHandler);
 
