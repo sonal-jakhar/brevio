@@ -14,7 +14,7 @@ const trackClick = (req, link) => {
       });
 
       await Link.findByIdAndUpdate(link._id, {
-        $inc: { clicks: 1 },
+        $inc: { totalClicks: 1 },
       });
     } catch (err) {
       console.error("Click tracking failed silently:", err.message);
