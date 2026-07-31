@@ -3,9 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
-
-const Dashboard = () => <h2 style={{ padding: "2rem" }}>Dashboard</h2>;
+import Dashboard from "./pages/Dashboard";
 
 const App = () => {
   return (
