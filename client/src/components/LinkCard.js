@@ -1,3 +1,5 @@
+import { Link as RouterLink } from "react-router-dom";
+
 const LinkCard = ({ link, baseUrl }) => {
   const shortUrl = `${baseUrl}/${link.shortCode}`;
 
@@ -40,6 +42,7 @@ const LinkCard = ({ link, baseUrl }) => {
         <span style={styles.badge}>
           {link.totalClicks ?? 0} {link.totalClicks === 1 ? "click" : "clicks"}
         </span>
+
         <span style={styles.date}>
           {new Date(link.createdAt).toLocaleDateString("en-IN", {
             day: "numeric",
@@ -47,6 +50,10 @@ const LinkCard = ({ link, baseUrl }) => {
             year: "numeric",
           })}
         </span>
+
+        <RouterLink to={`/links/${link._id}`} style={styles.analyticsLink}>
+          View Analytics →
+        </RouterLink>
       </div>
     </div>
   );
@@ -111,6 +118,13 @@ const styles = {
   date: {
     color: "#9ca3af",
     fontSize: "0.8rem",
+  },
+  analyticsLink: {
+    marginLeft: "auto",
+    color: "#2563eb",
+    fontWeight: 600,
+    textDecoration: "none",
+    fontSize: "0.85rem",
   },
 };
 
