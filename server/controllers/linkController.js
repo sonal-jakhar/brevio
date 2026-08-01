@@ -1,4 +1,5 @@
 const Link = require("../models/Link");
+const Click = require("../models/Click");
 const generateSlug = require("../utils/generateSlug");
 
 //Create a short link
@@ -63,4 +64,60 @@ const getUserLinks = async (req, res, next) => {
   }
 };
 
-module.exports = { createLink, getUserLinks };
+const getLinkAnalytics = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const link = await Link.findOne({
+      _id: id,
+      user: req.user._id,
+    });
+
+    if (!link) {
+      res.status(404);
+      throw new Error("Link not found");
+    }
+
+    const [facetResult] = await Click.aggregate([
+      { $match: { link: link._id } },
+      {
+        $facet: {
+          total: [{ $count: "count" }],
+
+          byCountry: [
+            { $group: { _id: "$country", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+          ],
+
+          byDevice: [
+            { $group: { _id: "$device", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+          ],
+
+          byBrowser: [
+            { $group: { _id: "$browser", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+          ],
+        },
+      },
+    ]);
+
+    const format = (arr) =>
+      arr.map((item) => ({
+        name: item._id || "Unknown",
+        value: item.count,
+      }));
+
+    res.json({
+      link,
+      totalClicks: facetResult.total[0]?.count || 0,
+      byCountry: format(facetResult.byCountry),
+      byDevice: format(facetResult.byDevice),
+      byBrowser: format(facetResult.byBrowser),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { createLink, getUserLinks, getLinkAnalytics };
