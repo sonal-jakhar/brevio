@@ -15,7 +15,7 @@ const createLink = async (req, res, next) => {
 
     //Handle custom slug
     if (customSlug) {
-      const slugExists = await Link.findOne({ shortCode: customSlug });
+      const slugExists = await Link.findOne({ customSlug });
       if (slugExists) {
         res.status(400);
         throw new Error("Custom slug already taken");

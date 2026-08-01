@@ -1,4 +1,4 @@
-const Link = require("../models/link");
+const Link = require("../models/Link");
 const { redisClient } = require("../config/redis");
 const { trackClick } = require("../utils/trackClick");
 
